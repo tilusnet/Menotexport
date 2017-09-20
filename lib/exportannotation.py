@@ -90,7 +90,7 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
 
     outstr=u'\n\n{0}\n# {1}'.format(int(80)*'-',conv(titleii))
 
-    with open(abpath_out, mode='a') as fout:
+    with open(abpath_out, mode='w') as fout:
         #outstr=outstr.encode('ascii','replace')
         outstr=outstr.encode('utf8','replace')
         fout.write(outstr)
@@ -172,7 +172,6 @@ def exportAnno(annodict,outdir,action,separate,verbose=True):
             fileout='Mendeley_annotations.txt'
 
         abpath_out=os.path.join(outdir,fileout)
-        abpath_out=tools.autoRename(abpath_out)
 
         if verbose:
             printInd('Exporting all annotations to:',3)
@@ -204,7 +203,6 @@ def exportAnno(annodict,outdir,action,separate,verbose=True):
             elif 'm' in action and 'n' in action:
                 fileout='Anno_%s.txt' %fnameii
             abpath_out=os.path.join(outdir,fileout)
-            abpath_out=tools.autoRename(abpath_out)
 
             if verbose:
                 printInd('Exporting annotations to:',3)
