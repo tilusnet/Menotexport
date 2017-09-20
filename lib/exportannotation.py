@@ -205,8 +205,8 @@ def exportAnno(annodict,outdir,action,separate,verbose=True):
         #----------------------Export----------------------
         try:
             _exportAnnoFile(abpath_out,annoii)
-        except:
-            annofaillist.append(basenameii)
+        except Exception as e:
+            annofaillist.append(basenameii + ':\n' + str(e) )
             continue
 
     return annofaillist
