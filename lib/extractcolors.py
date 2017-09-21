@@ -12,8 +12,8 @@ import os
 from textwrap import TextWrapper
 
 from lib import tools
-from tools import printHeader, printInd, printNumHeader
-    
+from tools import printHeader, printInd
+
 
 
 #--------------Export annotations grouped by colors------------------
@@ -52,23 +52,24 @@ def exportAnno(annodict,outdir,action,verbose=True):
     wrapper2.subsequent_indent='\t\t\t'
 
     with open(abpath_out, mode='a') as fout:
+
         #----------------Loop through sorted citation tags----------------
-        for annoii in sorted(annodict.values(), key=lambda d: d.meta.citationkey):
+        for annoii in sorted(annodict.values(), key=lambda d: d.meta['citationkey']):
 
             outstr=u'''\n\n{0}\n[@{1}]: {2}'''.format(
                 int(80)*'-',
-                conv(annoii.meta.citationkey),
-                conv(annoii.meta.title)
+                conv(annoii.meta['citationkey']),
+                conv(annoii.meta['title'])
             )
             outstr=outstr.encode('ascii','replace')
             fout.write(outstr)
 
-            for color_code, color_name in tools.color_labels:
-                matching_color_hls = [hl for hl in annoii.highlights if annoii.highlights.color == color_name]
-                matching_color_nts = [nt for nt in annoii.notes if annoii.notes.color == color_name]
+            for color_code, color_name in tools.color_labels.items():
+                matching_color_hls = [hl for hl in annoii.highlights if hl.color == color_name]
+                matching_color_nts = [nt for nt in annoii.notes if nt.color == color_name]
 
                 # -----------------Write highlights grouped by color-----------------
-                if matching_color_hls > 0:
+                if len(matching_color_hls) > 0:
                     outstr = u'''\n\n\t:{0} highlights:'''.format(conv(color_name.upper()))
                     outstr = outstr.encode('ascii', 'replace')
                     fout.write(outstr)
@@ -76,27 +77,25 @@ def exportAnno(annodict,outdir,action,verbose=True):
                     for hlii in matching_color_hls:
                         hlstr = wrapper.fill(hlii.text)
                         outstr = u'''
-                        \n\t\t> {0}
-    
-                        \t\t\t- Page #: {1}
-                        \t\t\t- Ctime: {2}'''.format(*map(conv, [hlstr, hlii.page, \
-                                                                 hlii.ctime]))
+\n\t\t> {0}
+
+\t\t\t- Page: {1}
+\t\t\t- Ctime: {2}'''.format(*map(conv, [hlstr, hlii.page, hlii.ctime]))
                         outstr = outstr.encode('ascii', 'replace')
                         fout.write(outstr)
 
                 # -----------------Write notes grouped by colors-----------------
-                if matching_color_nts > 0:
-                    outstr = u'''\n\n\t:{0} notes'''.format(conv(color_name.upper()))
+                if len(matching_color_nts) > 0:
+                    outstr = u'''\n\n\t:{0} notes:'''.format(conv(color_name.upper()))
                     outstr = outstr.encode('ascii', 'replace')
                     fout.write(outstr)
 
                     for ntii in matching_color_nts:
                         ntstr = wrapper.fill(ntii.text)
                         outstr = u'''
-                        \n\t\t- {0}
+\n\t\t- {0}
 
-                        \t\t\t- Page #: {1}
-                        \t\t\t- Ctime: {2}'''.format(*map(conv, [ntstr, ntii.page, \
-                                                                 ntii.ctime]))
+\t\t\t- Page: {1}
+\t\t\t- Ctime: {2}'''.format(*map(conv, [ntstr, ntii.page, ntii.ctime]))
                         outstr = outstr.encode('ascii', 'replace')
                         fout.write(outstr)
