@@ -26,7 +26,7 @@ import sys,os
 import sqlite3
 import argparse
 import pandas as pd
-from lib import extracttags
+from lib import extracttags, extractcolors
 from lib import extractnt
 from lib import exportpdf
 from lib import exportannotation
@@ -1073,6 +1073,10 @@ def processFolder(db,outdir,annotations,folderid,foldername,allfolders,action,\
         tagsdict=extracttags.groupByTags(annotations)
         extracttags.exportAnno(tagsdict,outdir_folder,action,verbose)
 
+        #--------Export annotations grouped by colors--------
+        extractcolors.exportAnno(annotations,outdir_folder,action,verbose)
+
+
     #----------Export meta and anno to bib file----------
     if 'b' in action:
 
@@ -1210,6 +1214,9 @@ def processCanonicals(db,outdir,annotations,docids,allfolders,action,\
         #--------Export annotations grouped by tags--------
         tagsdict=extracttags.groupByTags(annotations)
         extracttags.exportAnno(tagsdict,outdir_folder,action,verbose)
+
+        #--------Export annotations grouped by colors--------
+        extractcolors.exportAnno(annotations,outdir_folder,action,verbose)
 
     #----------Export meta and anno to bib file----------
     if 'b' in action:
