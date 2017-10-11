@@ -340,11 +340,11 @@ def getHighlights(db,results=None,folderid=None,foldername=None,filterdocid=None
 
     #------------------Get highlights------------------
     try:
-	ret = db.execute(query_new)
-	hascolor=True
+        ret = db.execute(query_new)
+        hascolor=True
     except:
-	ret = db.execute(query_old)
-	hascolor=False
+        ret = db.execute(query_old)
+        hascolor=False
 
     for ii,r in enumerate(ret):
         pth = converturl2abspath(r[0])
@@ -953,14 +953,14 @@ def extractAnnos(annotations,action,verbose):
             from lib import extracthl2
 
             try:
-	        #------ Check if pdftotext is available--------
-	        if extracthl2.checkPdftotext():
-		    if verbose:
-			printInd('Retrieving highlights using pdftotext ...',4,prefix='# <Menotexport>:')
+                #------ Check if pdftotext is available--------
+                if extracthl2.checkPdftotext():
+                    if verbose:
+                        printInd('Retrieving highlights using pdftotext ...',4,prefix='# <Menotexport>:')
                     hltexts=extracthl2.extractHighlights2(fii,annoii,verbose)
-	        else:
-		    if verbose:
-			printInd('Retrieving highlights using pdfminer ...',4,prefix='# <Menotexport>:')
+                else:
+                    if verbose:
+                        printInd('Retrieving highlights using pdfminer ...',4,prefix='# <Menotexport>:')
                     hltexts=extracthl2.extractHighlights(fii,annoii,verbose)
             except:
                 faillist.append(fnameii)
@@ -1374,7 +1374,7 @@ def main(dbfin,outdir,action,folder,separate,iszotero,verbose=True):
 
     #-----------------Remove tmp file-----------------
     if os.path.exists('tmp.txt'):
-	    os.remove('tmp.txt')
+        os.remove('tmp.txt')
 
 
     return 0
