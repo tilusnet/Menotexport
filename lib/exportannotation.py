@@ -13,8 +13,7 @@ Update time: 2016-04-12 22:09:38.
 
 import os
 from textwrap import TextWrapper
-import tools
-from tools import printHeader, printInd, printNumHeader
+from tools import printInd, printNumHeader, write_enu
 
 
 #------------------Export annotations in a single PDF------------------
@@ -45,7 +44,8 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
             - Tags: @tag1, @tag2, @tag3...
             - Ctime: creation time
             - Page: page number (ordinal)
-            - Colour: highlight colour
+            - Color: highlight color
+            - In Chapter: {[???]} Chapter title (p. page number)
     
     -----------------------------------------------------
     # Title of another PDF
@@ -59,7 +59,8 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
             - Tags: @tag1, @tag2, @tag3...
             - Ctime: creation time
             - Page: page number (ordinal)
-            - Colour: highlight colour
+            - Color: highlight color
+            - In Chapter: {[???]} Chapter title (p. page number)
 
     Use tabs in indention, and markup syntax: ">" for highlights, and "-" for notes.
 
@@ -91,9 +92,7 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
     outstr=u'\n\n{0}\n# {1}'.format(int(80)*'-',conv(titleii))
 
     with open(abpath_out, mode='w') as fout:
-        #outstr=outstr.encode('ascii','replace')
-        outstr=outstr.encode('utf8','replace')
-        fout.write(outstr)
+        write_enu(fout, outstr)
 
         #-----------------Write highlights-----------------
         if len(hlii)>0:
@@ -111,12 +110,11 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
 \t\t- Ctime: {3}
 \t\t- Page: {4}
 \t\t- Color: {5}
+\t\t- In Chapter: {6}{7} (p. {8})
 '''.format(*map(conv,[hlstr, hljj.citationkey,\
-    tagstr, hljj.ctime, hljj.page, hljj.color]))
-
-                #outstr=outstr.encode('ascii','replace')
-                outstr=outstr.encode('utf8','replace')
-                fout.write(outstr)
+    tagstr, hljj.ctime, hljj.page, hljj.color,\
+    '[???]' if hljj.toc_loc[1] else '', hljj.toc_loc[0][0].title, hljj.toc_loc[0][0].pageno]))
+                write_enu(fout, outstr)
 
         #-----------------Write notes-----------------
         if len(ntii)>0:
@@ -134,12 +132,11 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
 \t\t- Ctime: {3}
 \t\t- Page: {4}
 \t\t- Color: {5}
+\t\t- In Chapter: {6}{7} (p. {8})
 '''.format(*map(conv,[ntstr, ntjj.citationkey,\
-    tagstr, ntjj.ctime, ntjj.page, ntjj.color]))
-
-                #outstr=outstr.encode('ascii','replace')
-                outstr=outstr.encode('utf8','replace')
-                fout.write(outstr)
+    tagstr, ntjj.ctime, ntjj.page, ntjj.color,\
+   '[???]' if ntjj.toc_loc[1] else '', ntjj.toc_loc[0][0].title, ntjj.toc_loc[0][0].pageno]))
+                write_enu(fout, outstr)
 
         
 

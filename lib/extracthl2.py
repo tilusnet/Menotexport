@@ -31,6 +31,7 @@ from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTTextBox, LTTextLine, LTAnno,\
         LTTextBoxHorizontal, LTTextLineHorizontal, LTChar
 from numpy import sqrt, argsort
+from outlinepagenos import OutlinePagenos
 
 from subprocess import Popen, PIPE
 from collections import Counter
@@ -60,7 +61,7 @@ def checkPdftotext():
 #------Store highlighted texts with metadata------
 class Anno(object):
     def __init__(self,text,ctime=None,color=None,title=None,author=None,\
-            note_author=None,page=None,citationkey=None,tags=None):
+            note_author=None,page=None,citationkey=None,tags=None,toc_loc=None):
 
         self.text=text
         self.ctime=ctime
@@ -71,6 +72,7 @@ class Anno(object):
         self.page=page
         self.citationkey=citationkey
         self.tags=tags
+        self.toc_loc=toc_loc
 
         if tags is None:
             self.tags='None'
@@ -88,9 +90,10 @@ Page:               %s
 Annotation color:   %s
 Citation key:       %s
 Tags:               %s
+In chapter:         %s
 ''' %(self.text, self.ctime, self.title,\
       self.note_author, self.page, self.color, self.citationkey,\
-      ', '.join(self.tags))
+      ', '.join(self.tags), self.toc_loc)
         
         reprstr=reprstr.encode('ascii','replace')
 
@@ -617,6 +620,11 @@ def extractHighlights(filename,anno,verbose=True):
     #--------------Get pdfmine instances--------------
     document, interpreter, device=init(filename)
 
+
+    #--------------Build outline (toc) structure------
+    opn = OutlinePagenos(document)
+
+
     #----------------Loop through pages----------------
     hltexts=[]
 
@@ -659,7 +667,8 @@ def extractHighlights(filename,anno,verbose=True):
                         color=getColor(anno.highlights[ii+1]),\
                         title=anno.meta['title'],\
                         page=ii+1,citationkey=anno.meta['citationkey'],\
-                        tags=anno.meta['tags'])
+                        tags=anno.meta['tags'],\
+                        toc_loc=opn.get_chapter(ii+1))
 
                     hltexts.append(textjj)
 
@@ -690,6 +699,11 @@ def extractHighlights2(filename,anno,verbose=True):
 
     #--------------Get pdfmine instances--------------
     document, interpreter, device=init(filename)
+
+
+    #--------------Build outline (toc) structure------
+    opn = OutlinePagenos(document)
+
 
     #----------------Loop through pages----------------
     hltexts=[]
@@ -734,7 +748,8 @@ def extractHighlights2(filename,anno,verbose=True):
                         color=getColor(annoii),\
                         title=anno.meta['title'],\
                         page=ii+1,citationkey=anno.meta['citationkey'],\
-                        tags=anno.meta['tags'])
+                        tags=anno.meta['tags'],
+                        toc_loc=opn.get_chapter(ii+1))
 
                     hltexts.append(textjj)
 

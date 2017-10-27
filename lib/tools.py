@@ -31,6 +31,9 @@ def enu(text):
         return text
 
 
+write_enu = lambda strm, obj: strm.write(enu(obj))
+
+
 def printHeader(s, level=1, length=70, prefix='# <Menotexport>:'):
     from textwrap import TextWrapper
 
@@ -220,6 +223,3 @@ def saveFile(abpath_out,text,overwrite=True,verbose=True):
         fout.write(enu(text))
 
     return
-        
-
-        

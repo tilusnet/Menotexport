@@ -33,7 +33,7 @@ import wordfix
 #------Store highlighted texts with metadata------
 class Anno(object):
     def __init__(self,text,ctime=None,color=None,title=None,author=None,\
-            note_author=None,page=None,citationkey=None,tags=None):
+            note_author=None,page=None,citationkey=None,tags=None,toc_loc=None):
 
         self.text=text
         self.ctime=ctime
@@ -44,6 +44,7 @@ class Anno(object):
         self.page=page
         self.citationkey=citationkey
         self.tags=tags
+        self.toc_loc=toc_loc
 
         if tags is None:
             self.tags='None'
@@ -61,9 +62,10 @@ Citation key:       %s
 Annotation color:   %s
 Page:               %s
 Tags:               %s
+In chapter:         %s
 ''' %(self.text, self.ctime, self.title,\
-      self.note_author, self.page, self.citationkey,\
-      ', '.join(self.tags))
+      self.note_author, self.citationkey, self.color,\
+      self.page, ', '.join(self.tags), self.toc_loc)
         
         reprstr=reprstr.encode('ascii','replace')
 
@@ -449,7 +451,8 @@ def extractHighlights(filename,anno,verbose=True):
                         ctime=getCtime(anno.highlights[ii+1]),\
                         title=anno.meta['title'],\
                         page=ii+1,citationkey=anno.meta['citationkey'],\
-                        tags=anno.meta['tags'])
+                        tags=anno.meta['tags'],\
+                        )
 
                     hltexts.append(textjj)
 

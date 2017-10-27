@@ -962,8 +962,8 @@ def extractAnnos(annotations,action,verbose):
                     if verbose:
                         printInd('Retrieving highlights using pdfminer ...',4,prefix='# <Menotexport>:')
                     hltexts=extracthl2.extractHighlights(fii,annoii,verbose)
-            except:
-                faillist.append(fnameii)
+            except Exception as e:
+                faillist.append(fnameii + ': ' + str(e))
                 hltexts=[]
         else:
             hltexts=[]
@@ -973,8 +973,8 @@ def extractAnnos(annotations,action,verbose):
                 printInd('Retrieving notes...',4,prefix='# <Menotexport>:')
             try:
                 nttexts=extractnt.extractNotes(fii,annoii,verbose)
-            except:
-                faillist.append(fnameii)
+            except Exception as e:
+                faillist.append(fnameii + ': ' + str(e))
                 nttexts=[]
         else:
             nttexts=[]

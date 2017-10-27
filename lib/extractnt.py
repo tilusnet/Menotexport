@@ -10,14 +10,34 @@
 
 Update time: 2016-04-12 22:09:38.
 '''
-
+from pdfminer.pdfdocument import PDFDocument, PDFTextExtractionNotAllowed
+from pdfminer.pdfparser import PDFParser
+from lib.outlinepagenos import OutlinePagenos
 import tools
 
+
+#------------------------Initiate analysis objs------------------------
+def init(filename,verbose=True):
+    '''Initiate analysis objs
+    '''
+
+    fp = open(filename, 'rb')
+    # Create a PDF parser object associated with the file object.
+    parser = PDFParser(fp)
+    # Create a PDF document object that stores the document structure.
+    # Supply the password for initialization.
+    document = PDFDocument(parser)
+    # Check if the document allows text extraction. If not, abort.
+    if not document.is_extractable:
+        raise PDFTextExtractionNotAllowed
+    return document
+
+
 #-----------------Extract notes-----------------
-def extractNotes(path,anno,verbose=True):
+def extractNotes(filename,anno,verbose=True):
     '''Extract notes
 
-    <path>: str, absolute path to a PDF file.
+    <filename>: str, absolute path to a PDF file.
     <anno>: FileAnno obj, contains annotations in PDF.
     
     Return <nttexts>: list, Anno objs containing annotation info from a PDF.
@@ -28,6 +48,11 @@ def extractNotes(path,anno,verbose=True):
     notes=anno.notes
     meta=anno.meta
     nttexts=[]
+
+
+    #--------------Build outline (toc) structure------
+    opn = OutlinePagenos(init(filename))
+
 
     #----------------Loop through pages----------------
     if len(anno.ntpages)==0:
@@ -41,7 +66,8 @@ def extractNotes(path,anno,verbose=True):
                     color=note_color,\
                     title=meta['title'],\
                     page=pp,citationkey=meta['citationkey'], note_author=noteii['author'],\
-                    tags=meta['tags'])
+                    tags=meta['tags'],\
+                    toc_loc=opn.get_chapter(pp))
             nttexts.append(textjj)
 
     return nttexts
