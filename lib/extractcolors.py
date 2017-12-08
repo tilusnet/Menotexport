@@ -30,7 +30,7 @@ class ChapterHandler:
         chapters, ambiguous = toc_loc
         outstr = u'''
 \n\t\tIn Chapter{0}:
-{1}'''.format(*map(conv, ['*' if ambiguous else '', self._fmt_chapter_hierarchy(chapters)]))
+{1}'''.format(*map(conv, ['[ambig!]' if ambiguous else '', self._fmt_chapter_hierarchy(chapters)]))
         return outstr
 
     @staticmethod

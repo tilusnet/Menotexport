@@ -367,10 +367,10 @@ def getHighlights(db,results=None,folderid=None,foldername=None,filterdocid=None
             else:
                 color=None
 
-        hlight = {'rect': bbox,\
-                  'cdate': cdate,\
+        hlight = {'rect': bbox,
+                  'cdate': cdate,
                   'color': color,
-                  'page':pg\
+                  'page': pg
                   }
 
         #------------Save to dict------------

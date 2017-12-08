@@ -45,7 +45,7 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
             - Ctime: creation time
             - Page: page number (ordinal)
             - Color: highlight color
-            - In Chapter: {[???]} Chapter title (p. page number)
+            - In Chapter: {[ambig!]} Chapter title (p. page number)
     
     -----------------------------------------------------
     # Title of another PDF
@@ -60,7 +60,7 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
             - Ctime: creation time
             - Page: page number (ordinal)
             - Color: highlight color
-            - In Chapter: {[???]} Chapter title (p. page number)
+            - In Chapter: {[ambig!]} Chapter title (p. page number)
 
     Use tabs in indention, and markup syntax: ">" for highlights, and "-" for notes.
 
@@ -113,7 +113,7 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
 \t\t- In Chapter: {6}{7} (p. {8})
 '''.format(*map(conv,[hlstr, hljj.citationkey,\
     tagstr, hljj.ctime, hljj.page, hljj.color,\
-    '[???]' if hljj.toc_loc[1] else '', hljj.toc_loc[0][0].title, hljj.toc_loc[0][0].pageno]))
+    '[ambig!]' if hljj.toc_loc[1] else '', hljj.toc_loc[0][0].title, hljj.toc_loc[0][0].pageno]))
                 write_enu(fout, outstr)
 
         #-----------------Write notes-----------------
@@ -135,7 +135,7 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
 \t\t- In Chapter: {6}{7} (p. {8})
 '''.format(*map(conv,[ntstr, ntjj.citationkey,\
     tagstr, ntjj.ctime, ntjj.page, ntjj.color,\
-   '[???]' if ntjj.toc_loc[1] else '', ntjj.toc_loc[0][0].title, ntjj.toc_loc[0][0].pageno]))
+   '[ambig!]' if ntjj.toc_loc[1] else '', ntjj.toc_loc[0][0].title, ntjj.toc_loc[0][0].pageno]))
                 write_enu(fout, outstr)
 
         
