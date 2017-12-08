@@ -27,9 +27,6 @@ class OutlinePagenos:
         self._populate_toc_parents()
         self.pageno_keys = [x.pageno for x in self.toc]
 
-        if len(self.toc) == 0:
-            raise ValueError('TOC is empty.')
-
 
     def get_chapter(self, pageno, parents=True):
         """
@@ -39,6 +36,10 @@ class OutlinePagenos:
         :param parents: if False, return only the innermost ChapterEntry in the hierarchy.
         :return: ([ChapterEntries], ambiguous=boolean). Page numbers start at 1.
         """
+        if len(self.toc) == 0:
+            # Missing TOC
+            return [ChapterEntry(level=1, title="No TOC", pageno=0)], False
+
         # shifting pageno to zero based, internal repr
         pageno -= 1
         # find the index of the chapter within which pageno is
