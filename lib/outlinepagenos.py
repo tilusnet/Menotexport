@@ -95,19 +95,26 @@ class OutlinePagenos:
             outlines = self.doc.get_outlines()
             for (level, title, dest, a, se) in outlines:
                 pageno = None
-                if dest:
-                    dest = self._resolve_dest(dest)
-                    pageno = pages[dest[0].objid]
-                elif a:
-                    action = a
-                    if isinstance(action, PDFObjRef):
-                        dest = self._resolve_dest(action)
+                try:
+                    if dest:
+                        dest = self._resolve_dest(dest)
+                        if isinstance(dest, dict):
+                            dest = dest['D']
                         pageno = pages[dest[0].objid]
-                    elif isinstance(action, dict):
-                        subtype = action.get('S')
-                        if subtype and repr(subtype) == '/GoTo' and action.get('D'):
-                            dest = self._resolve_dest(action['D'])
-                            pageno = pages[dest[0].objid]
+                    elif a:
+                        action = a
+                        if isinstance(action, PDFObjRef):
+                            action = self._resolve_dest(action)
+                        if isinstance(action, dict):
+                            subtype = action.get('S')
+                            if subtype and repr(subtype) == '/GoTo' and action.get('D'):
+                                dest = self._resolve_dest(action['D'])
+                                if isinstance(dest, dict):
+                                    dest = dest['D']
+                                pageno = pages[dest[0].objid]
+                except AttributeError:
+                    raise AttributeError('My TOC parsing heuristic is not robust enough for this PDF. '
+                                         'You may want to improve it.')
                 if pageno is not None:
                     yield TocEntry(level, title, pageno, None)
         except PDFNoOutlines:
@@ -119,7 +126,5 @@ class OutlinePagenos:
         elif isinstance(dest, PSLiteral):
             dest = resolve1(self.doc.get_dest(dest.name))
         elif isinstance(dest, PDFObjRef):
-            dest = dest.resolve()
-        if isinstance(dest, dict):
-            dest = dest['D']
+            dest = resolve1(dest)
         return dest
