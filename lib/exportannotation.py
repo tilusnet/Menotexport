@@ -91,7 +91,7 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
 
     outstr=u'\n\n{0}\n# {1}'.format(int(80)*'-',conv(titleii))
 
-    with open(abpath_out, mode='w') as fout:
+    with open(abpath_out, mode='a') as fout:
         write_enu(fout, outstr)
 
         #-----------------Write highlights-----------------
