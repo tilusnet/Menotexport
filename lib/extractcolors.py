@@ -66,7 +66,7 @@ def exportAnno(annodict,outdir,action,verbose=True):
         printHeader('Exporting all annotation colors to:',3)
         printInd(abpath_out,4)
 
-    wrapper=TextWrapper(width=60, initial_indent='', subsequent_indent='\t\t\t')
+    wrapper=TextWrapper(width=55, initial_indent='', subsequent_indent='\t\t\t')
 
     with open(abpath_out, mode='a') as fout:
 
