@@ -586,25 +586,25 @@ def init(filename,verbose=True):
 
 
 
-#----------------Get the latest creation time of annos----------------
+#----------------Get creation time of annos----------------
 def getCtime(annos,verbose=True):
-    '''Get the latest creation time of a list of annos
-
+    ''' Returns the latest creation time of all annos.
     '''
-
     ctimes=[ii['cdate'] for ii in annos]
     ctimes.sort()
     return ctimes[-1]
 
 
+
 #----------------Get the color of annos----------------
 def getColor(annos):
-    '''Get the most common color for a list of annos
+    '''Annotation colours are returned as {colour: confidence} pairs
     '''
-
     colors = Counter([ii['color'] for ii in annos])
-    most_common_color_code = colors.most_common(1)[0][0]
-    return tools.color_labels.get(most_common_color_code, most_common_color_code)
+    return {
+        tools.color_labels.get(col_code, col_code): cnt*1./len(annos)
+        for col_code, cnt in colors.items()
+    }
 
 
 

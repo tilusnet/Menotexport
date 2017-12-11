@@ -81,7 +81,7 @@ def exportAnno(annodict,outdir,action,verbose=True):
             write_enu(fout, outstr)
 
             for color_code, color_name in tools.color_labels.items():
-                matching_color_hls = [hl for hl in annoii.highlights if hl.color == color_name]
+                matching_color_hls = [hl for hl in annoii.highlights if color_name in hl.color.keys()]
                 matching_color_nts = [nt for nt in annoii.notes if nt.color == color_name]
 
                 # -----------------Write highlights grouped by color-----------------
@@ -97,8 +97,13 @@ def exportAnno(annodict,outdir,action,verbose=True):
 \n\t\t\t> {0}
 
 \t\t\t\t- Page: {1}
-\t\t\t\t- Ctime: {2}'''.format(*map(conv, [hlstr, hlii.page, hlii.ctime]))
+\t\t\t\t- Updates on page: {2}'''.format(*map(conv, [hlstr, hlii.page, hlii.ctime]))
                         write_enu(fout, outstr)
+                        color_confidence = hlii.color[color_name]
+                        if color_confidence < 1:
+                            outstr=u'''
+\t\t\t\t- Color confidence: {:.0f}%'''.format(color_confidence*100)
+                            write_enu(fout, outstr)
 
                 # -----------------Write notes grouped by colors-----------------
                 if len(matching_color_nts) > 0:
@@ -113,5 +118,5 @@ def exportAnno(annodict,outdir,action,verbose=True):
 \n\t\t\t- {0}
 
 \t\t\t\t- Page: {1}
-\t\t\t\t- Ctime: {2}'''.format(*map(conv, [ntstr, ntii.page, ntii.ctime]))
+\t\t\t\t- Note updated: {2}'''.format(*map(conv, [ntstr, ntii.page, ntii.ctime]))
                         write_enu(fout, outstr)
