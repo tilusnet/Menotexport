@@ -116,6 +116,7 @@ class OutlinePagenos:
                     raise AttributeError('My TOC parsing heuristic is not robust enough for this PDF. '
                                          'You may want to improve it.')
                 if pageno is not None:
+                    title = title.replace('\r', ' ')
                     yield TocEntry(level, title, pageno, None)
         except PDFNoOutlines:
             pass
