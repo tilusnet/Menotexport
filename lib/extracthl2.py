@@ -19,26 +19,27 @@ Update time: 2016-06-22 16:26:16.
 
 
 
-from pdfminer.pdfparser import PDFParser
+import os
+import time
+from subprocess import Popen, PIPE
+
+from numpy import sqrt, argsort
+from pdfminer.converter import PDFPageAggregator
+from pdfminer.layout import LAParams
+from pdfminer.layout import LTTextBox, LTTextLine, LTAnno, \
+    LTTextBoxHorizontal, LTTextLineHorizontal, LTChar
+from pdfminer.pdfdevice import PDFDevice
 from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFPageInterpreter
+from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfpage import PDFTextExtractionNotAllowed
-from pdfminer.pdfinterp import PDFResourceManager
-from pdfminer.pdfinterp import PDFPageInterpreter
-from pdfminer.pdfdevice import PDFDevice
-from pdfminer.layout import LAParams
-from pdfminer.converter import PDFPageAggregator
-from pdfminer.layout import LTTextBox, LTTextLine, LTAnno,\
-        LTTextBoxHorizontal, LTTextLineHorizontal, LTChar
-from numpy import sqrt, argsort
-from outlinepagenos import OutlinePagenos
+from pdfminer.pdfparser import PDFParser
 
-from subprocess import Popen, PIPE
-from collections import Counter
 import tools
-import time
 import wordfix
-import os
+from lib.extractcolors import getColor
+from outlinepagenos import OutlinePagenos
 
 
 #------Test availability of pdftotext-------------
@@ -586,25 +587,14 @@ def init(filename,verbose=True):
 
 
 
-#----------------Get creation time of annos----------------
-def getCtime(annos,verbose=True):
-    ''' Returns the latest creation time of all annos.
+#----------------Get creation time of highlights----------------
+def getCtime(highlights,verbose=True):
+    ''' Returns the latest creation time of all highlights.
     '''
-    ctimes=[ii['cdate'] for ii in annos]
+    ctimes=[ii['cdate'] for ii in highlights]
     ctimes.sort()
     return ctimes[-1]
 
-
-
-#----------------Get the color of annos----------------
-def getColor(annos):
-    '''Annotation colours are returned as {colour: confidence} pairs
-    '''
-    colors = Counter([ii['color'] for ii in annos])
-    return {
-        tools.color_labels.get(col_code, col_code): cnt*1./len(annos)
-        for col_code, cnt in colors.items()
-    }
 
 
 
@@ -662,13 +652,13 @@ def extractHighlights(filename,anno,verbose=True):
 
                 if numjj>0:
                     #--------------Attach text with meta--------------
-                    textjj=Anno(textjj,\
-                        ctime=getCtime(anno.highlights[ii+1]),\
-                        color=getColor(anno.highlights[ii+1]),\
-                        title=anno.meta['title'],\
-                        page=ii+1,citationkey=anno.meta['citationkey'],\
-                        tags=anno.meta['tags'],\
-                        toc_loc=opn.get_chapter(ii+1))
+                    textjj=Anno(textjj, \
+                                ctime=getCtime(anno.highlights[ii+1]), \
+                                color=getColor(anno.highlights[ii + 1]), \
+                                title=anno.meta['title'], \
+                                page=ii+1, citationkey=anno.meta['citationkey'], \
+                                tags=anno.meta['tags'], \
+                                toc_loc=opn.get_chapter(ii+1))
 
                     hltexts.append(textjj)
 
@@ -743,13 +733,13 @@ def extractHighlights2(filename,anno,verbose=True):
 
                 if numjj>0:
                     #--------------Attach text with meta--------------
-                    textjj=Anno(textjj,\
-                        ctime=getCtime(annoii),\
-                        color=getColor(annoii),\
-                        title=anno.meta['title'],\
-                        page=ii+1,citationkey=anno.meta['citationkey'],\
-                        tags=anno.meta['tags'],
-                        toc_loc=opn.get_chapter(ii+1))
+                    textjj=Anno(textjj, \
+                                ctime=getCtime(annoii), \
+                                color=getColor(annoii), \
+                                title=anno.meta['title'], \
+                                page=ii+1, citationkey=anno.meta['citationkey'], \
+                                tags=anno.meta['tags'],
+                                toc_loc=opn.get_chapter(ii+1))
 
                     hltexts.append(textjj)
 

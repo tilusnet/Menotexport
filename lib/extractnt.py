@@ -12,6 +12,8 @@ Update time: 2016-04-12 22:09:38.
 '''
 from pdfminer.pdfdocument import PDFDocument, PDFTextExtractionNotAllowed
 from pdfminer.pdfparser import PDFParser
+
+import lib.extractcolors
 from lib.outlinepagenos import OutlinePagenos
 import tools
 
@@ -61,7 +63,7 @@ def extractNotes(filename,anno,verbose=True):
     for pp in anno.ntpages:
 
         for noteii in notes[pp]:
-            note_color=tools.color_labels.get(noteii['color'], noteii['color'])
+            note_color= lib.extractcolors.color_labels.get(noteii['color'], noteii['color'])
             textjj=Anno(noteii['content'], ctime=noteii['cdate'],\
                     color=note_color,\
                     title=meta['title'],\

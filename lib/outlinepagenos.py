@@ -6,6 +6,8 @@ from pdfminer.pdfdocument import PDFNoOutlines
 from collections import namedtuple
 from bisect import bisect_right
 
+from tools import conv
+
 TocEntry = namedtuple('TocEntry', 'level, title, pageno, parent_index')
 ChapterEntry = namedtuple('ChapterEntry', 'level, title, pageno')
 
@@ -129,3 +131,29 @@ class OutlinePagenos:
         elif isinstance(dest, PDFObjRef):
             dest = resolve1(dest)
         return dest
+
+
+class ChapterFormatter:
+
+    def __init__(self):
+        self.latest_printed = ([ChapterEntry(0, '', 0)], False)
+
+    def get_formatted_chapter(self, toc_loc):
+        if self.latest_printed == toc_loc:
+            return ''
+        self.latest_printed = toc_loc
+        chapters, ambiguous = toc_loc
+        outstr = u'''
+\n\t\tIn Chapter{0}:
+{1}'''.format(*map(conv, ['[ambig!]' if ambiguous else '', self._fmt_chapter_hierarchy(chapters)]))
+        return outstr
+
+    @staticmethod
+    def _fmt_chapter_hierarchy(chapters):
+        chapters = sorted(chapters, key=lambda chapter: chapter.level)
+        indent = '\t'*2
+        indented_chapter_items = ['%s%s%s (page %d)' % (indent, ' '*2*c.level, c.title, c.pageno) for c in chapters]
+        return '\n'.join(indented_chapter_items)
+
+
+

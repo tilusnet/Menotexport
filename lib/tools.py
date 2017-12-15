@@ -5,18 +5,7 @@ Update time: 2016-03-24 11:11:46.
 '''
 import os
 import re
-from collections import OrderedDict
 
-color_labels = OrderedDict([
-    ('#fff5ad', 'Yellow'),
-    ('#dcffb0', 'Green'),
-    ('#bae2ff', 'Blue'),
-    ('#d3c2ff', 'Purple'),
-    ('#ffc4fb', 'Pink'),
-    ('#ffb5b6', 'Red'),
-    ('#ffdeb4', 'Orange'),
-    ('#dbdbdb', 'Grey')
-])
 
 def deu(text):
     if isinstance(text,str):
@@ -30,6 +19,8 @@ def enu(text):
     else:
         return text
 
+
+conv = lambda x: unicode(x)
 
 write_enu = lambda strm, obj: strm.write(enu(obj))
 

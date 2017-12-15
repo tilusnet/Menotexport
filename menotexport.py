@@ -18,6 +18,7 @@
 Update time: 2016-04-15 16:25:00.
 Update time: 2016-06-22 16:26:11.
 '''
+import lib.exportannotation
 
 __version__='Menotexport v1.4'
 
@@ -26,7 +27,7 @@ import sys,os
 import sqlite3
 import argparse
 import pandas as pd
-from lib import extracttags, extractcolors
+from lib import extracttags
 from lib import extractnt
 from lib import exportpdf
 from lib import exportannotation
@@ -1069,10 +1070,10 @@ def processFolder(db,outdir,annotations,folderid,foldername,allfolders,action,\
 
         #--------Export annotations grouped by tags--------
         tagsdict=extracttags.groupByTags(annotations)
-        extracttags.exportAnno(tagsdict,outdir_folder,action,verbose)
+        lib.exportannotation.exportAnnoByTags(tagsdict, outdir_folder, action, verbose)
 
         #--------Export annotations grouped by colors--------
-        extractcolors.exportAnno(annotations,outdir_folder,action,verbose)
+        lib.exportannotation.exportAnnoByColors(annotations, outdir_folder, action, verbose)
 
 
     #----------Export meta and anno to bib file----------
@@ -1211,10 +1212,10 @@ def processCanonicals(db,outdir,annotations,docids,allfolders,action,\
 
         #--------Export annotations grouped by tags--------
         tagsdict=extracttags.groupByTags(annotations)
-        extracttags.exportAnno(tagsdict,outdir_folder,action,verbose)
+        lib.exportannotation.exportAnnoByTags(tagsdict, outdir_folder, action, verbose)
 
         #--------Export annotations grouped by colors--------
-        extractcolors.exportAnno(annotations,outdir_folder,action,verbose)
+        lib.exportannotation.exportAnnoByColors(annotations, outdir_folder, action, verbose)
 
     #----------Export meta and anno to bib file----------
     if 'b' in action:
