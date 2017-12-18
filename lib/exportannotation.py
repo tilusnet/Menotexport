@@ -13,9 +13,10 @@ Update time: 2016-04-12 22:09:38.
 
 import os
 from textwrap import TextWrapper
+from operator import itemgetter, attrgetter
 
 import lib.extractcolors
-from lib.outlinepagenos import ChapterFormatter
+from lib.outlinepagenos import ChapterFormatter, PageFormatter
 
 from tools import printInd, printNumHeader, printHeader, write_enu, conv
 
@@ -38,116 +39,87 @@ def _exportAnnoFile(abpath_out,anno,verbose=True):
     in the following format:
 
     -----------------------------------------------------
-    # Title of PDF
-
-        > Highlighted text line 1
-          Highlighted text line 2
-          Highlighted text line 3
-          ...
-            
-            - @citationkey
-            - Tags: @tag1, @tag2, @tag3...
-            - Ctime: creation time
-            - Page: page number (ordinal)
-            - Color: highlight color
-            - In Chapter: {[ambig!]} Chapter title (p. page number)
+    [@CitationKey] Title of PDF
     
-    -----------------------------------------------------
-    # Title of another PDF
+      Chapter  
+    
+        : Page #
+        : Last updates of note or page: ...
 
         > Highlighted text line 1
           Highlighted text line 2
           Highlighted text line 3
           ...
             
-            - @citationkey
-            - Tags: @tag1, @tag2, @tag3...
-            - Ctime: creation time
-            - Page: page number (ordinal)
-            - Color: highlight color
-            - In Chapter: {[ambig!]} Chapter title (p. page number)
+            - Color: highlight color (with probabilites)
+    
+        # Note text line 1
+          Note text line 2
+          Note text line 3
+          ...
+            
+            - Color: note color
 
-    Use tabs in indention, and markup syntax: ">" for highlights, and "-" for notes.
+    Use tabs in indention, and markup syntax: ">" for highlights, and "#" for notes.
 
-    Update time: 2016-02-24 13:59:56.
     '''
 
-    conv=lambda x:unicode(x)
-
-    wrapper=TextWrapper()
-    wrapper.width=80
-    wrapper.initial_indent=''
-    #wrapper.subsequent_indent='\t'+int(len('> '))*' '
-    wrapper.subsequent_indent='\t'
-
-    wrapper2=TextWrapper()
-    wrapper2.width=80-7
-    wrapper2.initial_indent=''
-    #wrapper2.subsequent_indent='\t\t'+int(len('- Tags: '))*' '
-    wrapper2.subsequent_indent='\t\t'
-
-    hlii=anno.highlights
-    ntii=anno.notes
-
-    try:
-        titleii=hlii[0].title
-    except:
-        titleii=ntii[0].title
-
-    outstr=u'\n\n{0}\n# {1}'.format(int(80)*'-',conv(titleii))
+    wrapper = TextWrapper(width=63, initial_indent='', subsequent_indent='\t\t')
 
     with open(abpath_out, mode='a') as fout:
+
+        outstr = u'''\n\n{0}\n[@{1}]: {2}'''.format(
+            int(80) * '-',
+            conv(anno.meta['citationkey']),
+            conv(anno.meta['title'])
+        )
         write_enu(fout, outstr)
 
-        #-----------------Write highlights-----------------
-        if len(hlii)>0:
+        ch_fmtr = ChapterFormatter()
+        pg_fmtr = PageFormatter()
 
-            #-------------Loop through highlights-------------
-            for hljj in hlii:
-                hlstr=wrapper.fill(hljj.text)
-                tagstr=', '.join(['@'+kk for kk in hljj.tags])
-                tagstr=wrapper2.fill(tagstr)
-                outstr=u'''
-\n\t> {0}
 
-\t\t- @{1}
-\t\t- Tags: {2}
-\t\t- Ctime: {3}
-\t\t- Page: {4}
-\t\t- Color: {5}
-\t\t- In Chapter: {6}{7} (p. {8})
-'''.format(*map(conv,[hlstr, hljj.citationkey,\
-    tagstr, hljj.ctime, hljj.page, hljj.color,\
-    '[ambig!]' if hljj.toc_loc[1] else '', hljj.toc_loc[0][0].title, hljj.toc_loc[0][0].pageno]))
+        for annoii in sorted(anno.notes + anno.highlights, key=attrgetter('page')):
+            is_highlight = isinstance(annoii.color, dict)
+            is_note = not is_highlight
+
+            # "Group by" chapter
+            chapter_str = ch_fmtr.get_formatted_chapter(annoii.toc_loc, indent=0)
+            write_enu(fout, chapter_str)
+
+            # "Group by" page
+            page_str = pg_fmtr.get_formatted_page(
+                annoii.page,
+                force=chapter_str,
+                indent=1
+            )
+            if page_str:
+                write_enu(fout, page_str)
+                # Also output highlight stats once per page
+                if annoii.page in anno.hlpages:
+                    # Find a hl entry for the current page and use it for stats
+                    hlii = [hl for hl in anno.highlights if hl.page == annoii.page][0]
+                    outstr = u'''
+\n\t: Highlights on page
+\t  - Colors: {0}
+\t  - Latest update: {1}'''.format(*map(conv, [hlii.color, hlii.ctime]))
+                    write_enu(fout, outstr)
+
+            # Output annotation
+            anno_str = wrapper.fill(annoii.text)
+            outstr = u'''
+\n\t\t{0} {1}'''.format(*map(conv, ['>' if is_highlight else '#', anno_str]))
+            write_enu(fout, outstr)
+
+            # Output note color and update timestamp
+            if is_note:
+                outstr = u'''
+\n\t\t\t- Color: {0}
+\t\t\t- Note update: {1}'''.format(*map(conv, [annoii.color, annoii.ctime]))
                 write_enu(fout, outstr)
 
-        #-----------------Write notes-----------------
-        if len(ntii)>0:
 
-            #----------------Loop through notes----------------
-            for ntjj in ntii:
-                ntstr=wrapper.fill(ntjj.text)
-                tagstr=', '.join(['@'+kk for kk in ntjj.tags])
-                tagstr=wrapper2.fill(tagstr)
-                outstr=u'''
-\n\t- {0}
 
-\t\t- @{1}
-\t\t- Tags: {2}
-\t\t- Ctime: {3}
-\t\t- Page: {4}
-\t\t- Color: {5}
-\t\t- In Chapter: {6}{7} (p. {8})
-'''.format(*map(conv,[ntstr, ntjj.citationkey,\
-    tagstr, ntjj.ctime, ntjj.page, ntjj.color,\
-   '[ambig!]' if ntjj.toc_loc[1] else '', ntjj.toc_loc[0][0].title, ntjj.toc_loc[0][0].pageno]))
-                write_enu(fout, outstr)
-
-        
-
-    
-
-    
 #--------------------Export highlights and/or notes--------------------
 def exportAnno(annodict,outdir,action,separate,verbose=True):
     '''Export highlights and/or notes to txt file
@@ -183,11 +155,9 @@ def exportAnno(annodict,outdir,action,separate,verbose=True):
     annofaillist=[]
 
     num=len(annodict)
-    docids=annodict.keys()
 
-    for ii,idii in enumerate(docids):
+    for ii, annoii in enumerate(sorted(annodict.values(), key=lambda d: d.meta['citationkey'])):
 
-        annoii=annodict[idii]
         fii=annoii.path
         basenameii=os.path.basename(fii)
         fnameii=os.path.splitext(basenameii)[0]
@@ -309,7 +279,7 @@ def exportAnnoByTags(annodict, outdir, action, verbose=True):
                         ntstr=wrapper.fill(ntkk.text)
                         title=wrapper2.fill(ntkk.title)
                         outstr=u'''
-\n\t\t- {0}
+\n\t\t# {0}
 
 \t\t\t- Title: {1}
 \t\t\t- Ctime: {2}'''.format(*map(conv,[ntstr, title,\
@@ -393,7 +363,7 @@ def exportAnnoByColors(annodict, outdir, action, verbose=True):
                         write_enu(fout, outstr)
                         ntstr = wrapper.fill(ntii.text)
                         outstr = u'''
-\n\t\t\t- {0}
+\n\t\t\t# {0}
 
 \t\t\t\t- Page: {1}
 \t\t\t\t- Note updated: {2}'''.format(*map(conv, [ntstr, ntii.page, ntii.ctime]))

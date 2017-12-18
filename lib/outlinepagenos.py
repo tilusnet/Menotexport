@@ -1,3 +1,4 @@
+import string
 
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdftypes import resolve1, PDFObjRef
@@ -82,6 +83,12 @@ class OutlinePagenos:
             return i - 1
         raise ValueError
 
+
+    def _sanitise_title(self, title):
+        ret = title.replace('\r', ' ')
+        ret = ''.join([c for c in ret if ord(c) >= 32])
+        return ret
+
     def _populate_toc_parents(self):
         latest_level_indices = [None]
         lli = latest_level_indices
@@ -118,7 +125,7 @@ class OutlinePagenos:
                     raise AttributeError('My TOC parsing heuristic is not robust enough for this PDF. '
                                          'You may want to improve it.')
                 if pageno is not None:
-                    title = title.replace('\r', ' ')
+                    title = self._sanitise_title(title)
                     yield TocEntry(level, title, pageno, None)
         except PDFNoOutlines:
             pass
@@ -138,22 +145,32 @@ class ChapterFormatter:
     def __init__(self):
         self.latest_printed = ([ChapterEntry(0, '', 0)], False)
 
-    def get_formatted_chapter(self, toc_loc):
-        if self.latest_printed == toc_loc:
+    def get_formatted_chapter(self, toc_loc, force=False, indent=2):
+        if self.latest_printed == toc_loc and not force:
             return ''
         self.latest_printed = toc_loc
         chapters, ambiguous = toc_loc
         outstr = u'''
-\n\t\tIn Chapter{0}:
-{1}'''.format(*map(conv, ['[ambig!]' if ambiguous else '', self._fmt_chapter_hierarchy(chapters)]))
+\n{0}In Chapter{1}:
+{2}'''.format(indent*'\t', *map(conv, ['[ambig!]' if ambiguous else '', self._fmt_chapter_hierarchy(chapters, indent)]))
         return outstr
 
     @staticmethod
-    def _fmt_chapter_hierarchy(chapters):
+    def _fmt_chapter_hierarchy(chapters, indent):
         chapters = sorted(chapters, key=lambda chapter: chapter.level)
-        indent = '\t'*2
-        indented_chapter_items = ['%s%s%s (page %d)' % (indent, ' '*2*c.level, c.title, c.pageno) for c in chapters]
+        indented_chapter_items = ['%s%s%s (page %d)' % (indent*'\t', ' '*2*c.level, c.title, c.pageno)
+                                  for c in chapters]
         return '\n'.join(indented_chapter_items)
 
 
+class PageFormatter:
+    def __init__(self):
+        self.latest_printed = -1
+
+    def get_formatted_page(self, page, force=False, indent=3):
+        if self.latest_printed == page and not force:
+            return ''
+        self.latest_printed = page
+        return u'''
+\n{0}: Page {1}'''.format(indent*'\t', page)
 

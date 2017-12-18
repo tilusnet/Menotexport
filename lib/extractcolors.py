@@ -8,6 +8,7 @@
 
 '''
 from collections import Counter, OrderedDict
+import operator
 
 
 color_labels = OrderedDict([
@@ -22,13 +23,28 @@ color_labels = OrderedDict([
 ])
 
 
+class HighlightColor(dict):
+    '''
+    Caters for probabilities, hence represented by a dict.
+    Colors are displayed in decreasing probability order.
+    Probabilities are displayed in percentages w/o decimals.
+    '''
+    def __str__(self):
+        return '{%s}' % ', '.join(
+            ['{}: {:.0f}%'.format(k, v * 100)
+             for k, v in sorted(self.items(), key=operator.itemgetter(1), reverse=True)
+             ]
+        )
+
+
 #----------------Get the color of highlights----------------
 def getColor(highlights):
     '''Highlights colours are returned as {colour: confidence} pairs
     '''
     colors = Counter([ii['color'] for ii in highlights])
-    return {
-        color_labels.get(col_code, col_code): cnt * 1. / len(highlights)
+    hl_color = HighlightColor({
+        color_labels.get(col_code, col_code):
+            cnt * 1. / len(highlights)
         for col_code, cnt in colors.items()
-    }
-
+    })
+    return hl_color
