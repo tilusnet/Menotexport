@@ -129,7 +129,6 @@ class OutlinePagenos:
                 except AttributeError:
                     self.msg.append('My TOC parsing heuristic is not robust enough for this PDF. '
                                      'You may want to improve it.')
-                    return
                 if pageno is not None:
                     title = self._sanitise_title(title)
                     yield TocEntry(level, title, pageno, None)
