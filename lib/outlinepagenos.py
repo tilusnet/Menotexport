@@ -47,7 +47,11 @@ class OutlinePagenos:
         # shifting pageno to zero based, internal repr
         pageno -= 1
         # find the index of the chapter within which pageno is
-        ch_idx = self._find_le(self.pageno_keys, pageno)
+        try:
+            ch_idx = self._find_le(self.pageno_keys, pageno)
+        except ValueError:
+            # note is before the first TOC entry: label it as [COVER], page 1
+            return [ChapterEntry(level=1, title="[COVER]", pageno=1)], False
         # Chapters may start halfway in the page, flag these ambiguities.
         # Only non top level chapters are ambiguous
         ambig = (
