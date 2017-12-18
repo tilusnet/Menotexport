@@ -23,6 +23,7 @@ class OutlinePagenos:
         """
 
         self.doc = pdfdocument
+        self.msg = []
         pages = dict((page.pageid, pageno) for (pageno, page)
                      in enumerate(PDFPage.create_pages(self.doc)))
 
@@ -122,13 +123,14 @@ class OutlinePagenos:
                                     dest = dest['D']
                                 pageno = pages[dest[0].objid]
                 except AttributeError:
-                    raise AttributeError('My TOC parsing heuristic is not robust enough for this PDF. '
-                                         'You may want to improve it.')
+                    self.msg.append('My TOC parsing heuristic is not robust enough for this PDF. '
+                                     'You may want to improve it.')
+                    return
                 if pageno is not None:
                     title = self._sanitise_title(title)
                     yield TocEntry(level, title, pageno, None)
         except PDFNoOutlines:
-            pass
+            self.msg.append('PDF has no TOC.')
 
     def _resolve_dest(self, dest):
         if isinstance(dest, str):
